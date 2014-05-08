@@ -3,7 +3,7 @@ vBox-Backup-Manager v1
 
 <h2>The Short</h2>
 
-<p>Manage scheduled backups through any number of vBox hosts. (JSP + JQuery Mobile + MySQL)
+<p>Manage scheduled backups through any number of vBox hosts. (JQuery Mobile + JSP + MySQL)
 Local Change.</p>
 
 
