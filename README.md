@@ -13,6 +13,7 @@ Local Change.</p>
 <li>JDK 1.8</li>
 <li>Virtual Box 4.2.0</li>
 <li>jQuery Mobile 1.4.2</li>
+<li>MySQL 5.1.10</li>
 </ul>
 
 <p>At its core is scheduling backups ( a Stop, Export, Start) . The Schedules can be recurring (e.g nightly, weekly...). Other schedule events such as Stop, Start, Re-Start can also be scheduled.</p>
@@ -25,9 +26,9 @@ Local Change.</p>
 
 <h2>Setup Overview</h2>
 <ol>
-<li>Setup requires a MySQL DB and the running of the included script to build the tables and stored procedures.</li>
-<li>Setting a server JDBC resource (e.g. GlassFish). There are screen shots of the required Resource configurations</li>
-<li>Placing the WAR in your web directory</li>
+<li>Setup requires a MySQL DB and the running of the included script to build the database.</li>
+<li>Setting up a server JDBC resource (e.g. GlassFish). Screen shots of a GlassFish resource implementation are included.</li>
+<li>Building the project.</li>
 </ol>
 
 <h2>Future</h2>
