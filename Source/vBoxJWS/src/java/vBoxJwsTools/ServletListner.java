@@ -38,9 +38,9 @@ public class ServletListner implements javax.servlet.ServletContextListener
         Logger.getLogger(ServletListner.class.getName()).log(Level.FINE,"Servlet Context Initialized....");
         SQL sql = new SQL(vBoxJWSResource);
         ScheduleManager scheduleManager = new ScheduleManager(sql);
-        VBoxHostMannager vBoxHostMannager = new VBoxHostMannager(sql,scheduleManager);
+        VBoxHostManager vBoxHostManager = new VBoxHostManager(sql,scheduleManager);
         sc.setAttribute("scheduleManager", scheduleManager);
-        sc.setAttribute("vBoxHostMannager",  vBoxHostMannager);
+        sc.setAttribute("vBoxHostManager",  vBoxHostManager);
         sc.setAttribute("sql",  sql);
     }
     

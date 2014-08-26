@@ -15,13 +15,13 @@
 
 
 <%
-VBoxHostMannager vBoxHostMannager = (VBoxHostMannager)getServletContext().getAttribute("vBoxHostMannager");
+VBoxHostManager vBoxHostManager = (VBoxHostManager)getServletContext().getAttribute("vBoxHostManager");
 ScheduleManager scheduleManager = (ScheduleManager)getServletContext().getAttribute("scheduleManager");
-MannagedMachine currentMannagedMachine = (MannagedMachine) session.getAttribute("currentMannagedMachine");
+ManagedMachine currentManagedMachine = (ManagedMachine) session.getAttribute("currentManagedMachine");
 
-if( currentMannagedMachine == null)
+if( currentManagedMachine == null)
 {
-    currentMannagedMachine = new MannagedMachine(0, "", null, null);
+    currentManagedMachine = new ManagedMachine(0, "", null, null);
 }
 
 String data = request.getParameter("data");
@@ -34,14 +34,14 @@ if(data != null)
     if(data.equals("getMachineDetails"))
     {
         String machineName = request.getParameter("machineName");
-        MannagedMachine tempMannagedMachine = (MannagedMachine)vBoxHostMannager.getIDeviceByName(machineName);
+        ManagedMachine tempManagedMachine = (ManagedMachine)vBoxHostManager.getIDeviceByName(machineName);
         
         Gson gson = new Gson();
-        session.setAttribute("currentMannagedMachine", tempMannagedMachine);
+        session.setAttribute("currentManagedMachine", tempManagedMachine);
         
-        tempMannagedMachine.getUpdatedProgresses();//updates the progress, but dosnt use the returned value here, it is sent via gson
+        tempManagedMachine.getUpdatedProgresses();//updates the progress, but dosnt use the returned value here, it is sent via gson
 
-        String gsontxt = gson.toJson(tempMannagedMachine);
+        String gsontxt = gson.toJson(tempManagedMachine);
 
         if(gsontxt != null)
         {
@@ -54,36 +54,36 @@ if(data != null)
     }
     else if (data.equals("stopCurrentMachine") )
     {
-        MannagedMachine tempMannagedMachine = (MannagedMachine) session.getAttribute("currentMannagedMachine");
+        ManagedMachine tempManagedMachine = (ManagedMachine) session.getAttribute("currentManagedMachine");
         
         final DateTime taskSession = DateTime.now();
-        if(tempMannagedMachine.startIDeviceSession(taskSession))
+        if(tempManagedMachine.startIDeviceSession(taskSession))
         {
-            tempMannagedMachine.performTask("Stop",5,taskSession);
+            tempManagedMachine.performTask("Stop",5,taskSession);
         }
         
-        tempMannagedMachine.endIDeviceSession(taskSession);
+        tempManagedMachine.endIDeviceSession(taskSession);
         
         response.sendRedirect(requestURL);
     }
     else if (data.equals("startCurrentMachine") )
     {
        final DateTime taskSession = DateTime.now();
-        if(currentMannagedMachine.startIDeviceSession(taskSession))
+        if(currentManagedMachine.startIDeviceSession(taskSession))
         {
-            session.setAttribute("Progresses", currentMannagedMachine.performTask("Start",5,taskSession));
+            session.setAttribute("Progresses", currentManagedMachine.performTask("Start",5,taskSession));
         }
         
-        currentMannagedMachine.endIDeviceSession(taskSession);
+        currentManagedMachine.endIDeviceSession(taskSession);
         response.sendRedirect(requestURL);
     }
     else if(data.equals("getListOfMachines"))
    {
-        ArrayList listOfMannagedMachines = getListOfMannagedMachines(vBoxHostMannager);
+        ArrayList listOfManagedMachines = getListOfManagedMachines(vBoxHostManager);
         Gson gson = new Gson();
         
-        Type listType = new TypeToken<ArrayList<MannagedMachine>>(){}.getType();
-        String gsontxt = gson.toJson(listOfMannagedMachines,listType );
+        Type listType = new TypeToken<ArrayList<ManagedMachine>>(){}.getType();
+        String gsontxt = gson.toJson(listOfManagedMachines,listType );
         
         if(gsontxt != null)
         {
@@ -97,35 +97,35 @@ if(data != null)
     }
     else if(data.equals("exportCurrentMachine")) 
     {
-        MannagedMachine tempMannagedMachine = (MannagedMachine) session.getAttribute("currentMannagedMachine");
+        ManagedMachine tempManagedMachine = (ManagedMachine) session.getAttribute("currentManagedMachine");
         
         final DateTime taskSession = DateTime.now();
-        if(tempMannagedMachine.startIDeviceSession(taskSession))
+        if(tempManagedMachine.startIDeviceSession(taskSession))
         {
-            session.setAttribute("Progresses", tempMannagedMachine.performTask("Export",5,taskSession));
+            session.setAttribute("Progresses", tempManagedMachine.performTask("Export",5,taskSession));
         }
         
-        tempMannagedMachine.endIDeviceSession(taskSession);
+        tempManagedMachine.endIDeviceSession(taskSession);
         
     }
     else if(data.equals("getCurrentMachineProgress")) 
     {
-       getProgressLastItem(currentMannagedMachine.progresses);
+       getProgressLastItem(currentManagedMachine.progresses);
     }
     else if(data.equals("rebuildManagerList"))
     {
         //rebuild the JWS server
-         vBoxHostMannager.refreshMannagedMachines();//probably should stop all schedules and create new, incase a new host is found (the reason for user refreshing)
+         vBoxHostManager.refreshManagedMachines();//probably should stop all schedules and create new, incase a new host is found (the reason for user refreshing)
    }           
     ////////////////////////////////////////////////////////////////////////////
     
         else if(data.equals("deleteMachineSchedule"))
         {
             String machineScheduleId = request.getParameter("MachineScheduleId");
-            scheduleManager.deleteMachineSchedule(currentMannagedMachine,Integer.parseInt(machineScheduleId));
+            scheduleManager.deleteMachineSchedule(currentManagedMachine,Integer.parseInt(machineScheduleId));
             
             Gson gson = new Gson();
-            String gsontxt = gson.toJson(currentMannagedMachine);
+            String gsontxt = gson.toJson(currentManagedMachine);
             
             if(gsontxt != null)
             {
@@ -139,10 +139,10 @@ if(data != null)
         else if(data.equals("cancelMachineSchedule"))
         {
             String machineScheduleId = request.getParameter("MachineScheduleId");
-            currentMannagedMachine.cancelIDeviceSchedule(Integer.parseInt(machineScheduleId));
+            currentManagedMachine.cancelIDeviceSchedule(Integer.parseInt(machineScheduleId));
             
             Gson gson = new Gson();
-            String gsontxt = gson.toJson(currentMannagedMachine);
+            String gsontxt = gson.toJson(currentManagedMachine);
             
             if(gsontxt != null)
             {
@@ -156,10 +156,10 @@ if(data != null)
         else if(data.equals("startMachineSchedule"))
         {
             String machineScheduleId = request.getParameter("MachineScheduleId");
-            currentMannagedMachine.startIDeviceSchedule(Integer.parseInt(machineScheduleId));
+            currentManagedMachine.startIDeviceSchedule(Integer.parseInt(machineScheduleId));
             
             Gson gson = new Gson();
-            String gsontxt = gson.toJson(currentMannagedMachine);
+            String gsontxt = gson.toJson(currentManagedMachine);
             
             if(gsontxt != null)
             {
@@ -174,7 +174,7 @@ if(data != null)
         {
             String machineScheduleId = request.getParameter("scheduleId"); 
           
-            ArrayList tempScheduleHistoryList = currentMannagedMachine.getScheduleHistory(Integer.parseInt(machineScheduleId));                   
+            ArrayList tempScheduleHistoryList = currentManagedMachine.getScheduleHistory(Integer.parseInt(machineScheduleId));                   
             Gson gson = new Gson();
             String gsontxt = gson.toJson(tempScheduleHistoryList);
             
@@ -189,10 +189,10 @@ if(data != null)
         else if(data.equals("deleteScheduleHistory"))
         {
             String machineScheduleId = request.getParameter("MachineScheduleId"); 
-            currentMannagedMachine.deleteScheduleHistory(Integer.parseInt(machineScheduleId));
+            currentManagedMachine.deleteScheduleHistory(Integer.parseInt(machineScheduleId));
             
             Gson gson = new Gson();
-            String gsontxt = gson.toJson(currentMannagedMachine);
+            String gsontxt = gson.toJson(currentManagedMachine);
             
             if(gsontxt != null)
             {
@@ -213,10 +213,10 @@ if(data != null)
             String[] dateTiemValues = startDate.split("/|:| ");
             DateTime scheduledDate = new DateTime( Integer.parseInt(dateTiemValues[2]) ,Integer.parseInt(dateTiemValues[1]),Integer.parseInt(dateTiemValues[0]),Integer.parseInt(dateTiemValues[3]),Integer.parseInt(dateTiemValues[4]));
         
-            vBoxHostMannager.scheduleManager.addMachineSchedule(currentMannagedMachine, Integer.parseInt(ScheduleEventType) , scheduledDate  , Integer.parseInt(ScheduleEventFrequency), path);
+            vBoxHostManager.scheduleManager.addMachineSchedule(currentManagedMachine, Integer.parseInt(ScheduleEventType) , scheduledDate  , Integer.parseInt(ScheduleEventFrequency), path);
             
             Gson gson = new Gson();
-            String gsontxt = gson.toJson(currentMannagedMachine);
+            String gsontxt = gson.toJson(currentManagedMachine);
             
             if(gsontxt != null)
             {
@@ -233,9 +233,9 @@ if(data != null)
 
 <%!
 
-public ArrayList getListOfMannagedMachines(VBoxHostMannager _vBoxHostMannager)
+public ArrayList getListOfManagedMachines(VBoxHostManager _vBoxHostManager)
 {
-   return _vBoxHostMannager.getIDevices();
+   return _vBoxHostManager.getIDevices();
 }
 
 public String getProgressLastItem(ArrayList progresses_)
@@ -302,9 +302,9 @@ public String printScheduledEventFrequencies()
 
 public String printBackupPaths()
 {
-    VBoxHostMannager vBoxHostMannager = (VBoxHostMannager)getServletContext().getAttribute("vBoxHostMannager");
+    VBoxHostManager vBoxHostManager = (VBoxHostManager)getServletContext().getAttribute("vBoxHostManager");
     String htmlResponce = "";
-    ArrayList BackupPathList = vBoxHostMannager.getBackupPaths();
+    ArrayList BackupPathList = vBoxHostManager.getBackupPaths();
    
     int listLength = BackupPathList.size();
     htmlResponce += "<select name=\"BackupPath\" id=\"BackupPath\" >";
@@ -334,32 +334,25 @@ public String printBackupPaths()
         <link rel="stylesheet" href="css/themes/vBoxJWS.min.css" />
         <link rel="stylesheet" href="css/themes/jquery.mobile.icons.min.css" />
         
-        <!--link rel="stylesheet" href="jquery/jquery.mobile-1.4.2.min.css" />
-        <script src="jquery/jquery-1.9.1.min.js"></script>
-        <script src="jquery/jquery.mobile-1.4.2.min.js"></script-->
-
         <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.3/jquery.mobile.structure-1.4.3.min.css" />
-<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
-<script src="http://code.jquery.com/mobile/1.4.3/jquery.mobile-1.4.3.min.js"></script>
+        <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+        <script src="http://code.jquery.com/mobile/1.4.3/jquery.mobile-1.4.3.min.js"></script>
 
-
-        
-        <script src="centerfire.js"></script>
-            <script type="text/javascript">
+        <script type="text/javascript">
        
             var Global_SelectedMachineName = "";
-            var Global_CurrentMannagedMachine = null;
+            var Global_CurrentManagedMachine = null;
 
             $(document).on('pageshow', "#indexPageId", function()
             { 
-               printMannagedMachineList("machineListDiv_IndexPage");
+               printManagedMachineList("machineListDiv_IndexPage");
             });
 
             $(document).on("pageshow","#machineSchedulePageId", function()
             {
                 $("#scheduleRecieptDivId").html("");
-                printMannagedMachineList("machineListDiv_SchedulePage");
-                printMachineSchedulePage(Global_CurrentMannagedMachine);
+                printManagedMachineList("machineListDiv_SchedulePage");
+                printMachineSchedulePage(Global_CurrentManagedMachine);
                 $("#ScheduleEventType").on("change", function()
                 {
                    if( getComboSelectedText("ScheduleEventType") === "Backup (Export Allpiance)")
@@ -375,156 +368,125 @@ public String printBackupPaths()
 
             function stopCurrentMachine(_machineName)
             {
-                var url = "vBoxJWS.jsp?data=stopCurrentMachine"; 
-
-                if(req !== null)
+                var ajax = $.ajax(
                 {
-                    document.close();
-                    return;
-                }
-
-                var req = initRequest();
-
-                req.open("POST", url, false);
-                req.send(null);//no parameters
-
-                if (req.readyState === 4)
+                    url:"vBoxJWS.jsp?data=stopCurrentMachine",
+                    dataType: "json",
+                    type: "POST",
+                    async: false,//wait for the response
+                    data:
+                    {
+                        
+                    }
+                });    
+        
+                 ajax.done(function()
                 {
-                    if (req.status === 200)
-                    {
-                        if(req.responseText === "")
-                        {
-                            return "";
-                        }
-
-                        mainMachinePage(_machineName);
-                        printMannagedMachineList();
-                    }
-                    else
-                    {
-                    }
-                }
-                document.close();   
+                    mainMachinePage(_machineName);
+                    printManagedMachineList();
+                }); 
             }
 
             function exportCurrentMachine()
             {
-                var url = "vBoxJWS.jsp?data=exportCurrentMachine"; 
-                var req = initRequest();
-
-                req.open("POST", url, false);
-                req.send(null);//no parameters
-
-                if (req.readyState === 4)
+                var ajax = $.ajax(
                 {
-                    if (req.status === 200)
+                    url:"vBoxJWS.jsp?data=exportCurrentMachine",
+                    dataType: "json",
+                    type: "POST",
+                    //async: false,//wait for the response
+                    data:
                     {
-                        if(req.responseText === "")
-                        {
-                            return "";
-                        }
-                        alert("Export Done");
+                        
                     }
-                    else
-                    {
-                    }
-                }
-                document.close();   
+                });
+        
+                 ajax.done(function(ManagedMachineList)
+                {
+                    alert("Export Done");
+                });    
             }
 
             function startCurrentMachine(_machineName)
             {
-                var url = "vBoxJWS.jsp?data=startCurrentMachine"; 
-                var req = initRequest();
-                req.open("POST", url, false);
-                req.send(null);//no parameters
-
-                if (req.readyState === 4)
+                var ajax = $.ajax(
                 {
-                    if (req.status === 200)
+                    url:"vBoxJWS.jsp?data=startCurrentMachine",
+                    dataType: "json",
+                    type: "POST",
+                    //async: false,//wait for the response
+                    data:
                     {
-                        if(req.responseText === "")
-                        {
-                            return "";
-                        }
-                        mainMachinePage(_machineName);
-                        printMannagedMachineList();
+                        
                     }
-                    else
-                    {
-                    }
-                }
-                document.close();   
+                });
+                
+                 ajax.done(function()
+                {
+                    mainMachinePage(_machineName);
+                    printManagedMachineList();
+                });
             }
 
-            function printMannagedMachineList(_destinationDiv)
+            function printManagedMachineList(_destinationDiv)
             {
-                var url = "vBoxJWS.jsp?data=getListOfMachines";
-                var req = initRequest();
-                var responseText = "";
-
-                req.open("POST", url, false);
-                req.send(null);//no parameters
-
-                if (req.readyState === 4)
+                var ajax = $.ajax(
                 {
-                    if (req.status === 200)
+                    url:"vBoxJWS.jsp?data=getListOfMachines",
+                    dataType: "json",
+                    type: "GET",
+                    //async: false,//wait for the response
+                    data:
                     {
-                        if(req.responseText === "")
-                        {
-                           return "";
-                        }
-
-                        var responseHTML = "";
-                        responseText = '(' + req.responseText + ')';
-
-                        var mannagedMachineList= eval(responseText);
-                        var numberOfMannagedMachines = mannagedMachineList.length;
-                        responseHTML += "<ul data-role=\"listview\" >";
-                        responseHTML += "<li data-role=\"list-divider\" data-theme=\"z\">Pages</li>";  
-
-                        for(var mannagedMachineCount = 0; mannagedMachineCount < numberOfMannagedMachines; mannagedMachineCount++)
-                        {
-                            responseHTML +="<li><a onclick='mainMachinePage(\""+ mannagedMachineList[mannagedMachineCount].iDeviceName+ "\")' href=\"\" >"  + mannagedMachineList[mannagedMachineCount].iDeviceName +": <div style='float:right'>"+mannagedMachineList[mannagedMachineCount].iDeviceState +"</div></a></li>";
-                        }
-                        responseHTML += "</ul>";
-
-                        $("#" + _destinationDiv).html(responseHTML);
-                        $("#" + _destinationDiv).trigger("create");
+                        
                     }
-                }
+                });
+                
+                ajax.done(function(ManagedMachineList)
+                {
+                    var responseHTML = "";
+
+                    var numberOfManagedMachines = ManagedMachineList.length;
+                    responseHTML += "<ul data-role=\"listview\" >";
+                    responseHTML += "<li data-role=\"list-divider\" data-theme=\"a\">Virtual Boxes</li>";  
+
+                    for(var ManagedMachineCount = 0; ManagedMachineCount < numberOfManagedMachines; ManagedMachineCount++)
+                    {
+                        responseHTML +="<li><a onclick='mainMachinePage(\""+ ManagedMachineList[ManagedMachineCount].iDeviceName+ "\")' href=\"\" >"  + ManagedMachineList[ManagedMachineCount].iDeviceName +": <div style='float:right'>"+ManagedMachineList[ManagedMachineCount].iDeviceState +"</div></a></li>";
+                    }
+                    responseHTML += "</ul>";
+
+                    $("#" + _destinationDiv).html(responseHTML);
+                    $("#" + _destinationDiv).trigger("create");
+                });
             }
 
             function mainMachinePage(_machineName)
             {
-                $.mobile.changePage("#indexPageId");
-                
-                var url = "vBoxJWS.jsp?data=getMachineDetails&machineName=" + _machineName; 
-                var req = initRequest();
-                    
                 var responseHTML = "";
                 var responseProgressesHTML = "";
                 var responseText = "";
-                var mannagedMachine = null;
-                        
-                req.open("POST", url, false);
-                req.send(null);//no parameters
-
-                if (req.readyState === 4)
+                var ManagedMachine = null;
+                
+                $.mobile.changePage("#indexPageId");
+                
+                var ajax = $.ajax(
                 {
-                    if (req.status === 200)
+                    url:"vBoxJWS.jsp?data=getMachineDetails",
+                    dataType: "json",
+                    type: "GET",
+                    //async: false,//wait for the response
+                    data:
                     {
-                        if(req.responseText === "")
-                        {
-                            return "";
-                        }
+                        machineName:_machineName
+                    }
+                });
+                   
+                ajax.done(function(ManagedMachine)
+                {
+                        Global_CurrentManagedMachine = ManagedMachine;
 
-                        responseText = '(' + req.responseText + ')';
-                        mannagedMachine = eval( responseText );
-                        
-                        Global_CurrentMannagedMachine = mannagedMachine;
-
-                        responseHTML += "<h1>" + mannagedMachine.mannagedBoxHostName +" : "+ mannagedMachine.iDeviceName+ "</h1>";
+                        responseHTML += "<h1>" + ManagedMachine.ManagedBoxHostName +" : "+ ManagedMachine.iDeviceName+ "</h1>";
 
                         responseHTML += "<table data-role=\"table\"  id=\"machineDetailTableId\" class=\"ui-responsive table-stroke\" style=\"display:table;\" ><thead><tr>";
 
@@ -534,47 +496,41 @@ public String printBackupPaths()
 
                         responseHTML += "</tr></thead><tbody><tr>";
 
-                            responseHTML += "<td>" + mannagedMachine.iDeviceState + "</td>";
-                            responseHTML += "<td>" + mannagedMachine.mannagedBoxHostURL + "</td>";
-                            responseHTML += "<td>" + mannagedMachine.mannagedBoxRam + "</td>";
+                            responseHTML += "<td>" + ManagedMachine.iDeviceState + "</td>";
+                            responseHTML += "<td>" + ManagedMachine.ManagedBoxHostURL + "</td>";
+                            responseHTML += "<td>" + ManagedMachine.ManagedBoxRam + "</td>";
 
                         responseHTML += "</tr></tbody></table>";
 
-                        var numberOfProgresses = mannagedMachine.progresses.length;
+                        var numberOfProgresses = ManagedMachine.progresses.length;
 
                         for(var numberOfProgressesCount = numberOfProgresses-1; 0 < numberOfProgressesCount; numberOfProgressesCount--)
                         {
-                           responseProgressesHTML +=  "<h2>" + mannagedMachine.progresses[numberOfProgressesCount].dateCreatedString + " " + mannagedMachine.progresses[numberOfProgressesCount].operationDescription + "</h2>";
+                           responseProgressesHTML +=  "<h2>" + ManagedMachine.progresses[numberOfProgressesCount].dateCreatedString + " " + ManagedMachine.progresses[numberOfProgressesCount].operationDescription + "</h2>";
                         }
 
-                        document.getElementById("contentDiv").innerHTML = responseHTML + getMachineOptions(mannagedMachine) + responseProgressesHTML + "<p></p>";
+                        document.getElementById("contentDiv").innerHTML = responseHTML + getMachineOptions(ManagedMachine) + responseProgressesHTML + "<p></p>";
                         
                         $("#machineDetailTableId").table();
                         $("#machineOptionsGroupId").controlgroup();
-                    }
-                    else
-                    {
-                     }
-                }
-                
-                document.close();
+                });  
             }
 
-            function getMachineOptions(_mannagedMachine)
+            function getMachineOptions(_ManagedMachine)
             {
                 var responseHTML = "";
                 responseHTML += "<div data-role='controlgroup'  id=\"machineOptionsGroupId\">";
 
-                if(_mannagedMachine.iDeviceState  === "Running")
+                if(_ManagedMachine.iDeviceState  === "Running")
                 {
-                  responseHTML += "<a onclick='stopCurrentMachine(\""+ _mannagedMachine.iDeviceName+"\")' data-role='button' >Stop</a>";
-                  responseHTML += "<a onclick=\"getMachineSchedule('"+ _mannagedMachine.iDeviceName+"')\" data-role='button' >Schedule</a>";
+                  responseHTML += "<a onclick='stopCurrentMachine(\""+ _ManagedMachine.iDeviceName+"\")' data-role='button' >Stop</a>";
+                  responseHTML += "<a onclick=\"getMachineSchedule('"+ _ManagedMachine.iDeviceName+"')\" data-role='button' >Schedule</a>";
                 }
 
-                if(_mannagedMachine.iDeviceState === "PoweredOff" || _mannagedMachine.iDeviceState  === "Aborted")
+                if(_ManagedMachine.iDeviceState === "PoweredOff" || _ManagedMachine.iDeviceState  === "Aborted")
                 {
-                    responseHTML += "<a onclick='startCurrentMachine(\""+ _mannagedMachine.iDeviceName+"\")' data-role='button' >Start</a>";
-                    responseHTML += "<a onclick=\"getMachineSchedule('"+ _mannagedMachine.iDeviceName+"')\" data-role='button' >Schedule</a>";
+                    responseHTML += "<a onclick='startCurrentMachine(\""+ _ManagedMachine.iDeviceName+"\")' data-role='button' >Start</a>";
+                    responseHTML += "<a onclick=\"getMachineSchedule('"+ _ManagedMachine.iDeviceName+"')\" data-role='button' >Schedule</a>";
                     responseHTML += "<a onclick='exportCurrentMachine()' data-role='button' >Export</a>";
                 }
 
@@ -650,34 +606,34 @@ public String printBackupPaths()
                     }
                 });
                 
-                ajax.done(function(mannagedMachine)
+                ajax.done(function(ManagedMachine)
                 {
                     $("#scheduleRecieptDivId").html("");
-                    Global_CurrentMannagedMachine = mannagedMachine; 
+                    Global_CurrentManagedMachine = ManagedMachine; 
                 });
             }
 
-            function printMachineSchedulePage(_Global_CurrentMannagedMachine)
+            function printMachineSchedulePage(_Global_CurrentManagedMachine)
             {
-                if(_Global_CurrentMannagedMachine === null)
+                if(_Global_CurrentManagedMachine === null)
                 {
                     return "";
                 }
-                 var responseHTML = "<h1>" + _Global_CurrentMannagedMachine.mannagedBoxHostName +" : "+ _Global_CurrentMannagedMachine.iDeviceName+ "</h1>";
+                 var responseHTML = "<h1>" + _Global_CurrentManagedMachine.ManagedBoxHostName +" : "+ _Global_CurrentManagedMachine.iDeviceName+ "</h1>";
                 $("#pageHeaddingDivId").html(responseHTML);
-                responseHTML = printMachineSchedules(_Global_CurrentMannagedMachine);
+                responseHTML = printMachineSchedules(_Global_CurrentManagedMachine);
                 $("#machineScheduleDivId").html(responseHTML);
                 $("#machineScheduleDivId").trigger("create");
             }
 
-            function printMachineSchedules(_Global_CurrentMannagedMachine)
+            function printMachineSchedules(_Global_CurrentManagedMachine)
             {
-                if(_Global_CurrentMannagedMachine === null)
+                if(_Global_CurrentManagedMachine === null)
                 {
                     return"";
                 }
 
-                var machineSchedules = _Global_CurrentMannagedMachine.iDeviceSchedules;
+                var machineSchedules = _Global_CurrentManagedMachine.iDeviceSchedules;
 
                 if(machineSchedules === null)
                 {
@@ -690,8 +646,8 @@ public String printBackupPaths()
                 }
 
                 var htmlResponce = "";
-                htmlResponce += "<div data-role=\"collapsible\" data-inset=\"false\" data-collapsed=\"false\">";
-                htmlResponce += "<h3>"+  _Global_CurrentMannagedMachine.iDeviceName + "'s Schedules</h3>";
+                htmlResponce += "<div data-role=\"collapsible\" data-inset=\"false\" data-collapsed=\"false\" data-theme=\"a\" data-content-theme=\"c\">";
+                htmlResponce += "<h3>"+  _Global_CurrentManagedMachine.iDeviceName + "'s Schedules</h3>";
                 htmlResponce += "<table data-role=\"table\"  id=\"scheduleListId\" class=\"ui-responsive table-stroke\" style=\"display:table;\" ><thead><tr>";
                 htmlResponce += "<thead>";
                 htmlResponce += "<tr>";
@@ -717,10 +673,10 @@ public String printBackupPaths()
                             + "<td>" + scheduleEventFrequency +" </td>"
                             + "<td>" + scheduleStatus +" </td>"
                             + "<td>"
-                            + "<a class=\"ui-btn ui-mini\" style=\"float:left; width:50px;\" onclick=\"deleteMachineSchedule("+ scheduleId +")\"> Delete </a>"
-                            + "<a class=\"ui-btn ui-mini\" style=\"float:left; width:50px;\" onclick=\"cancelMachineSchedule("+ scheduleId +")\"> Cancel </a>"
-                            + "<a class=\"ui-btn ui-mini\" style=\"float:left; width:50px;\" onclick=\"startMachineSchedule("+ scheduleId +")\"> Start </a>"
-                            + "<a class=\"ui-btn ui-mini\" style=\"float:left; width:50px;\" onclick=\"showScheduleHistory("+ scheduleId +")\"> History </a>"
+                            + "<a class=\"ui-btn ui-mini\" style=\"float:left; width:50px;\" onclick=\"deleteMachineSchedule("+ scheduleId +")\"  > Delete </a>"
+                            + "<a class=\"ui-btn ui-mini\" style=\"float:left; width:50px;\" onclick=\"cancelMachineSchedule("+ scheduleId +")\"  > Cancel </a>"
+                            + "<a class=\"ui-btn ui-mini\" style=\"float:left; width:50px;\" onclick=\"startMachineSchedule("+ scheduleId +")\"  > Start </a>"
+                            + "<a class=\"ui-btn ui-mini\" style=\"float:left; width:50px;\" onclick=\"showScheduleHistory("+ scheduleId +")\"  > History </a>"
                             + "</td></tr>" ;
                 });
 
@@ -743,10 +699,10 @@ public String printBackupPaths()
                     }
                 });
                 
-                 ajax.done(function(mannagedMachine)
+                 ajax.done(function(ManagedMachine)
                 {
-                    Global_CurrentMannagedMachine = mannagedMachine; 
-                    var responseHTML = printMachineSchedules(Global_CurrentMannagedMachine);
+                    Global_CurrentManagedMachine = ManagedMachine; 
+                    var responseHTML = printMachineSchedules(Global_CurrentManagedMachine);
                     $("#machineScheduleDivId").html(responseHTML);
                     $("#machineScheduleDivId").trigger("create");
                 });
@@ -767,10 +723,10 @@ public String printBackupPaths()
                     }
                 }); 
                 
-                ajax.done(function(mannagedMachine)
+                ajax.done(function(ManagedMachine)
                 {
-                    Global_CurrentMannagedMachine = mannagedMachine; 
-                    var responseHTML = printMachineSchedules(Global_CurrentMannagedMachine);
+                    Global_CurrentManagedMachine = ManagedMachine; 
+                    var responseHTML = printMachineSchedules(Global_CurrentManagedMachine);
                     $("#machineScheduleDivId").html(responseHTML);
                     $("#machineScheduleDivId").trigger("create");
                 });
@@ -799,10 +755,10 @@ public String printBackupPaths()
                     }
                 });
 
-                ajax.done(function(mannagedMachine)
+                ajax.done(function(ManagedMachine)
                 {
-                    Global_CurrentMannagedMachine = mannagedMachine; 
-                    var responseHTML = printMachineSchedules(Global_CurrentMannagedMachine);
+                    Global_CurrentManagedMachine = ManagedMachine; 
+                    var responseHTML = printMachineSchedules(Global_CurrentManagedMachine);
                     $("#machineScheduleDivId").html(responseHTML);
                     $("#machineScheduleDivId").trigger("create");
                 });
@@ -822,10 +778,10 @@ public String printBackupPaths()
                     }
                 });
                 
-                ajax.done(function(mannagedMachine)
+                ajax.done(function(ManagedMachine)
                 {
-                    Global_CurrentMannagedMachine = mannagedMachine; 
-                    var responseHTML = printMachineSchedules(Global_CurrentMannagedMachine);
+                    Global_CurrentManagedMachine = ManagedMachine; 
+                    var responseHTML = printMachineSchedules(Global_CurrentManagedMachine);
                     $("#machineScheduleDivId").html(responseHTML);
                     $("#machineScheduleDivId").trigger("create");
                 });
@@ -838,15 +794,14 @@ public String printBackupPaths()
     <div data-role="page" id="indexPageId" data-theme="c">
 
 	<div data-role="header" data-theme="a">
-            <h1>Navigation System</h1>
-            <a href="../../" data-icon="home" data-iconpos="notext" data-direction="reverse">Home</a>
-            <a href="../nav.html" data-icon="search" data-iconpos="notext" data-rel="dialog" data-transition="fade">Search</a>
+            <h1>vBoxManager</h1>
+            <a href="vBoxJWS.jsp" rel="external" data-icon="home" data-iconpos="notext" data-direction="reverse">Home</a>
         </div><!-- /header -->
 
 	<div data-role="content" class="ui-content" >
             <div style="width:20%; float:left;">
                 <ul data-role="listview" data-insert="true" >
-                    <li data-role="list-divider" data-theme="z">Pages</li>
+                    <!--li data-role="list-divider" data-theme="z">Pages</li-->
                     <li><a href="admin.jsp" >Admin</a></li>
                 </ul>
                 <p></p>
@@ -859,7 +814,7 @@ public String printBackupPaths()
          </div>         
 
         <div data-role="footer" class="footer-docs" data-theme="a">
-            <p>&copy; 2012 jQuery Foundation and other contributors</p>
+           <p></p>
         </div>
          
     </div><!-- /page -->
@@ -870,14 +825,13 @@ public String printBackupPaths()
 	
     <div data-role="header" data-theme="a">
         <h1>Add Host</h1>
-        <a href="../../" data-icon="home" data-iconpos="notext" data-direction="reverse">Home</a>
-        <a href="../nav.html" data-icon="search" data-iconpos="notext" data-rel="dialog" data-transition="fade">Search</a>
+        <a href="vBoxJWS.jsp" rel="external" data-icon="home" data-iconpos="notext" data-direction="reverse">Home</a>
     </div><!-- /header -->
 
     <div role="main" class="ui-content">
         <div style="width:20%; float:left;">
             <ul data-role="listview" data-insert="true" data-divider-theme="a">
-                <li data-role="list-divider">Pages</li>
+                <!--li data-role="list-divider">Pages</li-->
                 <li><a href="admin.jsp">Admin</a></li>
                 <li><a href="#indexPageId">Machines</a></li>
             </ul>
@@ -889,7 +843,7 @@ public String printBackupPaths()
         <div style="width:78%; float:left; margin-left:2%;">
             <div id="contentDiv">
                 <div id="pageHeaddingDivId"></div>
-                <div data-role="collapsible" data-inset="false">
+                <div data-role="collapsible" data-inset="false" data-theme="a" data-content-theme="c">
                 <h3>Add a new Schedule</h3>   
                     
                         <div data-role="fieldcontain">
@@ -933,7 +887,7 @@ public String printBackupPaths()
         </div>
     </div>
     <div data-role="footer" class="footer-docs" data-theme="a">
-        <p>&copy; 2012 jQuery Foundation and other contributors</p>
+       <p></p>
     </div>
 </div><!-- /page -->
 </body>

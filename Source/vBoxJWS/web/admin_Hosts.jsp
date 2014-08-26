@@ -9,7 +9,7 @@
 
 
 <%
-    VBoxHostMannager vBoxHostMannager = (VBoxHostMannager)getServletContext().getAttribute("vBoxHostMannager");
+    VBoxHostManager vBoxHostManager = (VBoxHostManager)getServletContext().getAttribute("vBoxHostManager");
 
     String hostAlternateName= request.getParameter("alternativeHostName");
     String hostURL = request.getParameter("hostURL");
@@ -18,7 +18,7 @@
 
     if(hostAlternateName != "" && hostAlternateName != null)
     {
-      vBoxHostMannager.insertIDeviceHost(hostURL, hostAlternateName, hostUserName, hostPassword);  
+      vBoxHostManager.insertIDeviceHost(hostURL, hostAlternateName, hostUserName, hostPassword);  
     }
 %>
 
@@ -30,7 +30,7 @@ if(data != null)
 {
     if(data.equals("deleteHost"))
     {
-        vBoxHostMannager.deleteIDeviceHost(hostURL); 
+        vBoxHostManager.deleteIDeviceHost(hostURL); 
     }
 }
 %>
@@ -40,20 +40,20 @@ if(data != null)
 public String  printHostList()
 {
     String resultHTML = "";
-    VBoxHostMannager.MannagedBoxHost mannagedBoxHost  = null;
+    VBoxHostManager.ManagedBoxHost ManagedBoxHost  = null;
 
-    VBoxHostMannager vBoxHostMannager = (VBoxHostMannager)getServletContext().getAttribute("vBoxHostMannager");
-    ArrayList mannagedBoxHostsList = vBoxHostMannager.getMannagedBoxHostsList();
+    VBoxHostManager vBoxHostManager = (VBoxHostManager)getServletContext().getAttribute("vBoxHostManager");
+    ArrayList ManagedBoxHostsList = vBoxHostManager.getManagedBoxHostsList();
 
     resultHTML += "<table data-role=\"table\" id=\"HostListTableId\" class=\"ui-responsive table-stroke\" style=\"display:table;\" >";
     resultHTML += "<thead><tr><th>Host Name</th>";
     resultHTML += "<th>URL</th>";
     resultHTML += "<th></th></tr></thead><tbody>";
 
-    for(Object mannagedBoxHostObject : mannagedBoxHostsList)
+    for(Object ManagedBoxHostObject : ManagedBoxHostsList)
     {
-        mannagedBoxHost = (VBoxHostMannager.MannagedBoxHost)mannagedBoxHostObject;
-        resultHTML += "<tr><td>" + mannagedBoxHost.getIDeviceHostName() +" </td><td>"+mannagedBoxHost.getHostURL()+ "</td><td><a class=\"ui-btn ui-mini\" style=\"float:left; width:90%;\" href=\"admin_Hosts.jsp?data=deleteHost&hostURL="+mannagedBoxHost.getHostURL()+"\"  > Delete </a></td></tr>" ;
+        ManagedBoxHost = (VBoxHostManager.ManagedBoxHost)ManagedBoxHostObject;
+        resultHTML += "<tr><td>" + ManagedBoxHost.getIDeviceHostName() +" </td><td>"+ManagedBoxHost.getHostURL()+ "</td><td><a class=\"ui-btn ui-mini\" style=\"float:left; width:90%;\" href=\"admin_Hosts.jsp?data=deleteHost&hostURL="+ManagedBoxHost.getHostURL()+"\"  > Delete </a></td></tr>" ;
     }
 
     return resultHTML += "</tbody></table>";
@@ -67,31 +67,33 @@ public String  printHostList()
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>JSP Page</title>
         
-        <link rel="stylesheet" href="jquery/jquery.mobile-1.4.2.min.css" />
-	<script src="jquery/jquery-1.9.1.min.js"></script>
-	<script src="jquery/jquery.mobile-1.4.2.min.js"></script>
+        <link rel="stylesheet" href="css/themes/vBoxJWS.min.css" />
+        <link rel="stylesheet" href="css/themes/jquery.mobile.icons.min.css" />
         
-        <script src="centerfire.js"></script>
+        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.3/jquery.mobile.structure-1.4.3.min.css" />
+        <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+        <script src="http://code.jquery.com/mobile/1.4.3/jquery.mobile-1.4.3.min.js"></script>
+        
     </head>
     <body>
         
-       <div data-role="page" class="type-interior" id="one">
+       <div data-role="page" class="type-interior" id="AdminHostsPageId">
             
-            <div data-role="header" data-theme="f">
+            <div data-role="header" data-theme="a">
 		<h2>Add vBox Web Server (Host)</h2>
-		<a href="../../" data-icon="home" data-iconpos="notext" data-direction="reverse">Home</a>
-		<a href="../nav.html" data-icon="search" data-iconpos="notext" data-rel="dialog" data-transition="fade">Search</a>
+		<a href="vBoxJWS.jsp" rel="external" data-icon="home" data-iconpos="notext" data-direction="reverse">Home</a>
+		
             </div><!-- /header -->
             
             <div role="main" class="ui-content">
                 <div style="width:20%; float:left;">
                         <div data-role="listview" data-theme="c" data-dividertheme="d">
-                            <li data-role="list-divider">Pages</li>
+                            <!--li data-role="list-divider">Pages</li-->
                             <li><a href="vBoxJWS.jsp" rel="external">Machines</a></li>
                         </div>
                         <p></p>
                         <div data-role="listview" data-theme="c" data-dividertheme="d">
-                            <li data-role="list-divider">Options</li>
+                            <li data-role="list-divider" data-theme="a">Admin Options</li>
                             <li><a href="admin_Hosts.jsp">Hosts</a></li>
                             <li><a href="admin_BackupPath.jsp">Backup Paths</a></li>
                             <li><a href="vBoxJWS.jsp" rel="external">Machines</a></li>
@@ -141,37 +143,29 @@ public String  printHostList()
                     
                 </div>
             </div>
-                <div data-role="footer" class="footer-docs" data-theme="c">
-                    <p>&copy; 2012 jQuery Foundation and other contributors</p>
+                <div data-role="footer" class="footer-docs" data-theme="a">
+                   <p></p>
                 </div>
                     
                                        <script type="text/javascript">
 function refreshMachineList()
     {
-      var url = "vBoxJWS.jsp?data=rebuildManagerList"; 
-        
-        var req = initRequest();
-        
-        req.open("POST", url, false);
-        req.send(null);//no parameters
-
-        if (req.readyState === 4)
+        var ajax = $.ajax(
         {
-            if (req.status === 200)
+            url:"vBoxJWS.jsp?data=rebuildManagerList",
+            dataType: "json",
+            type: "POST",
+            async: false,//wait for the response
+            data:
             {
-                if(req.responseText === "")
-                {
-                    return "";
-                }
-           }
-            else
-            {
-            }
-        }
 
-        document.close();   
-        
-        printMannagedMachineList();
+            }
+        });    
+
+        ajax.done(function()
+        {
+             printManagedMachineList();
+        });
     }
 </script>
         </div>

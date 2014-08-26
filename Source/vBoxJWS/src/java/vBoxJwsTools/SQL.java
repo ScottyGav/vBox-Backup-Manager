@@ -304,7 +304,7 @@ System.out.println("callStoredProc: " + strProc_);
  * @return      -Dont return null
  * @throws      -Fail fast
  */
-    public void populateManagedBoxHostList(VBoxHostMannager _vBoxHostMannager, ScheduleManager _scheduleManager)
+    public void populateManagedBoxHostList(VBoxHostManager _vBoxHostManager, ScheduleManager _scheduleManager)
     {
        ArrayList hostList = new ArrayList();
        ResultSet rs = null;
@@ -322,7 +322,7 @@ System.out.println("callStoredProc: " + strProc_);
                    String hostUserName =  rs.getString(4);
                    String hostPassword =  rs.getString(5);
 
-                   _vBoxHostMannager.addMannagedBoxHost(managedBoxHostId,hostURL ,hostAlternateName, hostUserName , hostPassword);
+                   _vBoxHostManager.addManagedBoxHost(managedBoxHostId,hostURL ,hostAlternateName, hostUserName , hostPassword);
                }
            }
            catch (SQLException ex)
@@ -341,11 +341,11 @@ System.out.println("callStoredProc: " + strProc_);
  * @return      -Dont return null
  * @throws      -Fail fast
  */
-    public ArrayList getPersistantIDevicesForHostId(int  _mannagedBoxHostId)
+    public ArrayList getPersistantIDevicesForHostId(int  _ManagedBoxHostId)
     {
         ArrayList managedMachines = new ArrayList();
         ResultSet rs = null;
-        rs = callStoredProcRS("{call spSelectManagedMachinesForHostId("+ _mannagedBoxHostId +")}");
+        rs = callStoredProcRS("{call spSelectManagedMachinesForHostId("+ _ManagedBoxHostId +")}");
 
         if(rs!= null)
         {
@@ -355,7 +355,7 @@ System.out.println("callStoredProc: " + strProc_);
                 {
                     int managedMachineId =  rs.getInt(1);
                     String machineName =  rs.getString(2);
-                    managedMachines.add(new MannagedMachine(null,managedMachineId , machineName, null));
+                    managedMachines.add(new ManagedMachine(null,managedMachineId , machineName, null));
                 }
             }
             catch (SQLException ex)
@@ -662,11 +662,11 @@ System.out.println("callStoredProc: " + strProc_);
  * @return      -Dont return null
  * @throws      -Fail fast
  */
-    public ArrayList getMachineSchedules(IDevice _mannagedMachine, ScheduleManager _scheduleManager)
+    public ArrayList getMachineSchedules(IDevice _ManagedMachine, ScheduleManager _scheduleManager)
     {
         ArrayList machineSchedules = null;
         ResultSet rs = null;
-        rs = callStoredProcRS("{call spSelectMachineSchedules("+_mannagedMachine.getIDeviceId()+")}");
+        rs = callStoredProcRS("{call spSelectMachineSchedules("+_ManagedMachine.getIDeviceId()+")}");
         
         int machineScheduleId = 0;
         int managedMachineId = 0;
@@ -697,7 +697,7 @@ System.out.println("callStoredProc: " + strProc_);
                     ArrayList scheduleReciepts = getScheduleReciepts(machineScheduleId);
         
         
-                    DeviceSchedule tempMachineSchedule = new DeviceSchedule( machineScheduleId,_mannagedMachine, scheduleEventTypeId, startDateTime, scheduleEventFrequencyId, scheduleConfigText, _scheduleManager, scheduleEventType, scheduleEventFrequency, scheduleReciepts);
+                    DeviceSchedule tempMachineSchedule = new DeviceSchedule( machineScheduleId,_ManagedMachine, scheduleEventTypeId, startDateTime, scheduleEventFrequencyId, scheduleConfigText, _scheduleManager, scheduleEventType, scheduleEventFrequency, scheduleReciepts);
                     machineSchedules.add(tempMachineSchedule);
                  }
             }

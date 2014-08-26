@@ -12,7 +12,7 @@
 <%@ page language="java" import="vBoxJwsTools.*" %>
 <!DOCTYPE html>
 <%
-    VBoxHostMannager vBoxHostMannager = (VBoxHostMannager)getServletContext().getAttribute("vBoxHostMannager");
+    VBoxHostManager vBoxHostManager = (VBoxHostManager)getServletContext().getAttribute("vBoxHostManager");
 
     //Ajax postbacks
     String data = request.getParameter("data");
@@ -21,7 +21,7 @@
         if(data.equals("deletePath"))
         {
             String pathId = request.getParameter("pathId");
-            vBoxHostMannager.deleteBackupPath(pathId);
+            vBoxHostManager.deleteBackupPath(pathId);
         }
     }
 
@@ -29,7 +29,7 @@
     String backupPath = request.getParameter("backupPath");
     if(backupPath != "" && backupPath != null)
     {
-      vBoxHostMannager.addBackupPath( backupPath);  
+      vBoxHostManager.addBackupPath( backupPath);  
     }
 %>
 
@@ -37,9 +37,9 @@
 
 public String printBackupPaths()
 {
-    VBoxHostMannager vBoxHostMannager = (VBoxHostMannager)getServletContext().getAttribute("vBoxHostMannager");
+    VBoxHostManager vBoxHostManager = (VBoxHostManager)getServletContext().getAttribute("vBoxHostManager");
     String htmlResponce = "";
-    ArrayList BackupPathList = vBoxHostMannager.getBackupPaths();
+    ArrayList BackupPathList = vBoxHostManager.getBackupPaths();
 
     int listLength = BackupPathList.size();
 
@@ -65,32 +65,32 @@ public String printBackupPaths()
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>JSP Page</title>
         
-        <link rel="stylesheet" href="jquery/jquery.mobile-1.4.2.min.css" />
-	<script src="jquery/jquery-1.9.1.min.js"></script>
-	<script src="jquery/jquery.mobile-1.4.2.min.js"></script>
+        <link rel="stylesheet" href="css/themes/vBoxJWS.min.css" />
+        <link rel="stylesheet" href="css/themes/jquery.mobile.icons.min.css" />
         
-        <script src="centerfire.js"></script>
+        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.3/jquery.mobile.structure-1.4.3.min.css" />
+        <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+        <script src="http://code.jquery.com/mobile/1.4.3/jquery.mobile-1.4.3.min.js"></script>
         
     </head>
     <body>
         
-       <div data-role="page" class="type-interior" id="one">
+       <div data-role="page" class="type-interior" id="AdminBackupPathPageId">
             
-            <div data-role="header" data-theme="f">
-		<h1>Navigation System</h1>
-		<a href="../../" data-icon="home" data-iconpos="notext" data-direction="reverse">Home</a>
-		<a href="../nav.html" data-icon="search" data-iconpos="notext" data-rel="dialog" data-transition="fade">Search</a>
+            <div data-role="header" data-theme="a">
+		<h1>vBoxManager</h1>
+		<a href="vBoxJWS.jsp" rel="external" data-icon="home" data-iconpos="notext" data-direction="reverse">Home</a>
 	</div><!-- /header -->
             
              <div role="main" class="ui-content">
                 <div style="width:20%; float:left;">
                     <div data-role="listview" data-theme="c" data-dividertheme="d">
-                        <li data-role="list-divider">Pages</li>
+                        <!--li data-role="list-divider">Pages</li-->
                         <li><a href="vBoxJWS.jsp" rel="external" >Machines</a></li>
                     </div>
                     <p></p>
                     <div data-role="listview" data-theme="c" data-dividertheme="d">
-                        <li data-role="list-divider">Admin Options</li>
+                        <li data-role="list-divider" data-theme="a">Admin Options</li>
                         <li><a href="admin_Hosts.jsp">Hosts</a></li>
                         <li><a href="admin_BackupPath.jsp">Backup Paths</a></li>
                         <li><a href="vBoxJWS.jsp" rel="external">Machines</a></li>
@@ -121,36 +121,29 @@ public String printBackupPaths()
                     </div> 
                 </div>
             </div>
-            <div data-role="footer" class="footer-docs" data-theme="c">
-                <p>&copy; 2012 jQuery Foundation and other contributors</p>
+            <div data-role="footer" class="footer-docs" data-theme="a">
+               <p></p>
             </div>
                     
 <script type="text/javascript">
     function refreshMachineList()
     {
-        var url = "vBoxJWS.jsp?data=rebuildManagerList"; 
-        
-        var req = initRequest();
-        
-        req.open("POST", url, false);
-        req.send(null);//no parameters
-
-        if (req.readyState === 4)
+        var ajax = $.ajax(
         {
-            if (req.status === 200)
+            url:"vBoxJWS.jsp?data=rebuildManagerList",
+            dataType: "json",
+            type: "POST",
+            async: false,//wait for the response
+            data:
             {
-                if(req.responseText === "")
-                {
-                    return "";
-                }
-           }
-            else
-            {
-            }
-        }
 
-        document.close();   
-        printMannagedMachineList();
+            }
+        });    
+
+        ajax.done(function()
+        {
+             printManagedMachineList();
+        });
     }
 </script>
 

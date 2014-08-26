@@ -19,7 +19,7 @@ public interface IDeviceManager
     public void         addBackupPath(String _backupPath);
     public void         deleteBackupPath(String _backupPathId);
     public ArrayList    getBackupPaths();
-    public ArrayList<IDevice>    getPersistantIDevicesForHostId(int _mannagedBoxHostId);
+    public ArrayList<IDevice>    getPersistantIDevicesForHostId(int _ManagedBoxHostId);
     public void loadIDeviceSchedules(IDevice _transientIDevice, boolean _activateSchedules);
     
     public IDeviceProgress startIDevice(IDevice _iDevice, int _pauseTillCheckSeconds);
