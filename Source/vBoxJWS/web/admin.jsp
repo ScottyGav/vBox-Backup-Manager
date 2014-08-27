@@ -24,8 +24,9 @@
         String requestURL = request.getRequestURL().toString(); 
         if(data.equals("rebuildManagerList"))
         {
-            //rebuild the JWS server
+            //rebuild the JWS server.
             vBoxHostManager.refreshManagedMachines();
+			//rebuild the JWS server.
         }
     }
 %>   
