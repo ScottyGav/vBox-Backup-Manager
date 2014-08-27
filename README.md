@@ -3,8 +3,7 @@
 
 <h2>The Short</h2>
 
-<p>Manage scheduled backups through any number of vBox hosts. (JQuery Mobile + JSP + MySQL)
-Local Change.</p>
+<p>Manage scheduled backups through any number of vBox hosts. (JQuery Mobile + JSP + MySQL).</p>
 
 
 <h2>The Long</h2>
